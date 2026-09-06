@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+
+
+<!-- Google tag (gtag.js) -->
+<script src="js/01-security-shims.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-52QKXTC1J4"></script>
+
+
+<!-- Firebase Compatibility & App Scripts -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn-icons-png.flaticon.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<script src="js/02-init.js"></script><script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+
+<script src="js/03-init.js"></script><script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-check-compat.js"></script>
+
+
+<!-- Leaflet CSS & JS for Interactive Map Selection & Live Tracking -->
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.google.com https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://*.firebaseapp.com https://*.google-analytics.com https://*.analytics.google.com https://nominatim.openstreetmap.org; frame-src 'self' https://*.firebaseapp.com https://www.google.com https://accounts.google.com https://www.youtube.com; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="theme-color" content="#0b1220"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SewaAstra">
+<title>SewaAstra PRO - Home Services (Cloud Connected)</title>
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+
+<link rel="stylesheet" href="css/app.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ═══════ v27: REAL PWA ═══════ -->
+<meta name="description" content="SewaAstra – AC, RO, Fridge, Washing Machine, Electrician, Plumber: verified experts aapke ghar, one click par. Booking, live tracking, secure payment.">
+<meta name="application-name" content="SewaAstra">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ff6b00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SewaAstra">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+
+
+
+
+
+<!-- v9: Agora SDK हटाया — खुद की WebRTC mask calling -->
+
+<!-- ═══════ SewaAstra SECURITY CORE v1 (auto-injected) ═══════ -->
+
+<!-- ═══════ /SECURITY CORE ═══════ -->
+</head>
+<body id="mainBody">
+
+<!-- GLOBAL LOADING SPINNER -->
+<div id="globalLoaderOverlay">
+    <div class="spinner-ring"></div>
+    <div id="loaderText">कृपया प्रतीक्षा करें... (Loading...)</div>
+</div>
+
+<div id="welcomeToast"></div>
+
+<!-- CUSTOM BEAUTIFUL ALERT POPUP -->
+<div id="customAlertOverlay">
+    <div class="custom-alert-box">
+        <h3 id="customAlertTitle">सूचना</h3>
+        <p id="customAlertMsg">यहाँ संदेश होगा...</p>
+        <button onclick="closeCustomAlert()">ठीक है (OK)</button>
+    </div>
+</div>
+
+<!-- CONDITIONAL APP INSTALL POPUP MODAL (SHOWS ONLY AFTER LOGIN IF NOT INSTALLED) -->
+<div id="installAppModal" class="full-overlay" style="display:none; z-index: 9999999;">
+    <div class="box" style="text-align: center; max-width: 360px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3067/3067403.png" alt="SewaAstra Logo" style="width: 80px; height: 80px;" />
+        <div class="welcome-note" style="font-size: 22px;">SewaAstra App</div>
+        <div class="tagline" style="margin-bottom: 15px;">बेहतर और तेज़ अनुभव के लिए ऐप इनस्टॉल करें या होम स्क्रीन पर जोड़ें</div>
+        <div style="background: var(--primary-light); padding: 12px; border-radius: 12px; font-size: 13px; color: var(--primary); font-weight: 600; margin-bottom: 20px; text-align: left;">
+            ✨ फायदे:<br>
+            • वन-क्लिक होम सर्विस बुकिंग<br>
+            • लाइव पार्टनर ट्रैकिंग और WhatsApp अपडेट<br>
+            • विशेष कूपन और कैशबैक
+        </div>
+        <button onclick="triggerAppInstall()" style="background: var(--success); margin-bottom: 10px;">
+            <i class="fa fa-download"></i> 📲 App Install करें
+        </button>
+        <button onclick="closeInstallModal()" style="background: #eee; color: #555; box-shadow: none;">
+            बाद में (Continue in Browser)
+        </button>
+    </div>
+</div>
+
+<!-- MANDATORY STUNNING AUTHENTICATION OVERLAY -->
+<div id="authOverlay" class="full-overlay premium-auth" style="display:flex;">
+    <div class="pa-bg"><span class="pa-orb pa-o1"></span><span class="pa-orb pa-o2"></span><span class="pa-orb pa-o3"></span></div>
+    <div class="pa-card">
+        <div class="pa-logo-wrap">
+            <div class="pa-ring"></div>
+            <img src="sewaastra.png" alt="SewaAstra Logo" onerror="this.style.display='none';document.getElementById('paLogoFb').style.display='flex';" />
+            <div id="paLogoFb" class="pa-logo-fb">🛠️</div>
+        </div>
+        <h1 class="pa-title">Sewa<span>Astra</span></h1>
+        <p class="pa-sub">भारत की सबसे भरोसेमंद होम सर्विस ऐप</p>
+        <div class="pa-trust">
+            <span>✅ Verified Experts</span><span>🔒 100% Secure</span><span>⭐ 4.8 Rated</span>
+        </div>
+
+        <button class="pa-google" onclick="loginWithGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" /> Google से लॉगिन करें
+        </button>
+
+        <div class="pa-divider">या ईमेल और पासवर्ड से लॉगिन करें</div>
+
+        <div id="emailAuthSection">
+            <div class="pa-input-group">
+                <span class="pa-flag">✉️</span>
+                <input type="email" id="userEmail" placeholder="ईमेल पता (Email address)" autocomplete="email" onkeydown="if(event.key==='Enter')emailPassSubmit()" />
+            </div>
+            <div class="pa-input-group" style="margin-top:10px;">
+                <span class="pa-flag">🔒</span>
+                <input type="password" id="userPass" placeholder="पासवर्ड (कम से कम 6 अक्षर)" autocomplete="current-password" onkeydown="if(event.key==='Enter')emailPassSubmit()" />
+            </div>
+            <div id="paAuthMsg" style="display:none;font-size:11px;font-weight:700;color:#c62828;background:#ffe9e9;border:1px solid #ffd0d0;border-radius:10px;padding:8px 10px;margin-top:10px;line-height:1.5;"></div>
+            <button class="pa-btn" id="emailPassBtn" onclick="emailPassSubmit()">🔐 Login करें &nbsp;<i class="fa fa-arrow-right"></i></button>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:4px;">
+                <span class="pa-link" id="emailModeLink" onclick="emailModeToggle()">पहली बार? नया अकाउंट बनाएं →</span>
+                <span class="pa-link" onclick="emailPassReset()">पासवर्ड भूल गए?</span>
+            </div>
+        </div>
+        <p class="pa-terms">जारी रखने पर आप हमारी <b>सेवा शर्तें</b> व <b>गोपनीयता नीति</b> स्वीकार करते हैं</p>
+    </div>
+</div>
+
+<!-- POST-GOOGLE LOGIN MOBILE NUMBER PROMPT OVERLAY -->
+<div id="googlePhonePromptOverlay" class="full-overlay premium-auth" style="display:none;">
+    <div class="pa-bg"><span class="pa-orb pa-o1"></span><span class="pa-orb pa-o2"></span></div>
+    <div class="pa-card">
+        <div class="pa-logo-wrap">
+            <div class="pa-ring"></div>
+            <img src="sewaastra.png" alt="SewaAstra Logo" onerror="this.style.display='none';document.getElementById('paLogoFb2').style.display='flex';" />
+            <div id="paLogoFb2" class="pa-logo-fb">📱</div>
+        </div>
+        <h1 class="pa-title" style="font-size:22px;">मोबाइल नंबर दर्ज करें</h1>
+        <p class="pa-sub">सुरक्षा और बुकिंग कन्फर्मेशन के लिए</p>
+        <div class="pa-input-group">
+            <span class="pa-flag">🇮🇳 +91</span>
+            <input type="tel" id="googleLinkedPhone" placeholder="मोबाइल नंबर (10 अंक)" maxlength="10" inputmode="numeric" />
+        </div>
+        <button class="pa-btn" onclick="submitGoogleLinkedPhone()">नंबर सेव करें &nbsp;<i class="fa fa-check"></i></button>
+    </div>
+</div>
+
+<!-- INTERACTIVE LEAFLET MAP MODAL -->
+<div id="leafletMapModal">
+    <div style="display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 10px;">
+        <h3 style="margin:0;">मैप पर अपनी सटीक लोकेशन चुनें</h3>
+        <i class="fa fa-times" onclick="closeMapModal()" style="font-size:24px; cursor:pointer;"></i>
+    </div>
+    <div id="mapContainer"></div>
+    <button onclick="confirmMapLocation()" style="background:var(--success); border:none; padding:12px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">लोकेशन कन्फर्म करें</button>
+</div>
+
+<!-- LIVE TRACKING MODAL -->
+<div id="liveTrackingModal">
+    <div style="display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 10px;">
+        <h3 style="margin:0;">🛵 लाइव पार्टनर ट्रैकिंग (Live Tracking)</h3>
+        <i class="fa fa-times" onclick="closeLiveTracking()" style="font-size:24px; cursor:pointer;"></i>
+    </div>
+    <div id="trackingMapContainer"></div>
+    <div style="background:white; padding:15px; border-radius:15px; margin-top:10px; text-align:center;">
+        <b>पार्टनर: राहुल कुमार (4.9 ⭐)</b><br>
+        <span style="font-size:13px; color:#666;">आपकी लोकेशन की ओर आ रहे हैं (ETA: 12 mins)</span>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="openMaskCall()" style="flex:1; background:var(--success); color:white; border:none; padding:10px; border-radius:10px; font-weight:bold; cursor:pointer;"><i class="fa fa-phone-alt"></i> Mask Call</button>
+            <button onclick="openInAppChat()" style="flex:1; background:var(--primary); color:white; border:none; padding:10px; border-radius:10px; font-weight:bold; cursor:pointer;"><i class="fa fa-comment-dots"></i> Chat</button>
+        </div>
+    </div>
+</div>
+
+<!-- MASK CALL & IN-APP CHAT MODAL -->
+<div id="chatCallModal" onclick="closeChatCallModal(event)">
+    <div class="chat-box" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0; font-size:16px;">💬 पार्टनर से चैट (Masked Secure Chat)</h3>
+            <i class="fa fa-times" onclick="closeChatCallModal()" style="cursor:pointer; font-size:20px;"></i>
+        </div>
+        <div class="chat-messages" id="chatMsgContainer">
+            <div class="chat-bubble partner">नमस्ते जी! मैं रास्ते में हूँ, कुछ ही देर में पहुँच रहा हूँ।</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="chatInputMsg" class="input-field" placeholder="संदेश लिखें..." style="margin:0;">
+            <button onclick="sendChatMessage()" style="padding:10px 15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin:0;"><i class="fa fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- MORE CATEGORIES SHEET MODAL -->
+<div id="moreOverlay" class="more-overlay" onclick="closeMoreSheet(event)">
+    <div class="more-sheet" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin:0; font-size: 18px;"><i class="fa fa-th-large" style="color:var(--primary)"></i> सभी श्रेणियां (More Categories)</h2>
+            <i class="fa fa-times" onclick="toggleMoreSheet()" style="cursor:pointer; font-size: 20px; padding: 5px;"></i>
+        </div>
+        <div id="moreCategoriesGridArea" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-bottom: 20px;"></div>
+    </div>
+</div>
+
+<!-- PROFILE & SETTINGS SHEET WITH 10+ ACTIVE CUSTOMER REQUIREMENTS -->
+<div id="profileOverlay" class="profile-overlay" onclick="closeProfile(event)">
+    <div class="profile-sheet" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin:0; font-size: 20px;"><i class="fa fa-user-circle" style="color:var(--primary)"></i> Profile & Settings</h2>
+            <i class="fa fa-times" onclick="toggleProfile()" style="cursor:pointer; font-size: 22px; padding: 5px;"></i>
+        </div>
+        
+        <div class="profile-header-card">
+            <div class="profile-avatar-wrap" onclick="triggerUpload()">
+                <img id="sheetPic" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" />
+            </div>
+            <div class="profile-user-info">
+                <h3 id="profilePhoneDisplay">+91 7869969190</h3>
+                <p>Verified SewaAstra User</p>
+                <span style="font-size: 11px; color: var(--primary); font-weight: bold; cursor: pointer;" onclick="triggerUpload()">गैलरी से फोटो बदलें</span>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)" />
+        </div>
+
+        <div id="adminPanelMenuBtn" class="setting-item-row" onclick="openAdminPanel()" style="display:none; background:var(--primary-light); border-color:var(--primary);">
+            <div><i class="fa fa-tools" style="color:var(--primary);"></i> <b>Admin Panel (मैनेजमेंट)</b></div> <i class="fa fa-chevron-right" style="font-size: 12px; color:var(--primary);"></i>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <div style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: 6px;">🌐 पूरी App की भाषा बदलें (Google Translate)</div>
+            <button type="button" onclick="swGtShow()" style="width:100%;border:1.5px dashed var(--primary);background:var(--primary-light);color:var(--primary);padding:11px;border-radius:12px;font-weight:900;font-size:12.5px;cursor:pointer;">🌐 अनुवाद करें / Translate App</button>
+            <div style="font-size:9.5px;color:#888;margin-top:5px;">Google Translate से पूरी app (A–Z) एक साथ बदलती है — कोई भी data reset नहीं होता</div>
+            <div id="swGtHost"></div>
+        </div>
+
+        <div class="settings-section-title">Preferences & App</div>
+        <div class="setting-item-row" onclick="toggleDark()">
+            <div><i class="fa fa-moon"></i> Dark / Light Mode</div> <input type="checkbox" id="darkBtn" style="pointer-events:none;" />
+        </div>
+        <div class="setting-item-row" onclick="getLiveLocation(); toggleProfile();">
+            <div><i class="fa fa-map-marker-alt"></i> GPS Auto-Detect Location</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="shareApp()">
+            <div><i class="fa fa-share-alt"></i> Share App with Friends</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="showHistory(); toggleProfile();">
+            <div><i class="fa fa-history"></i> Order History & Live Tracking</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+
+        <div class="settings-section-title">Customer Requirements & Tools (10+)</div>
+        <div class="setting-item-row" onclick="custReqAction('Wallet')">
+            <div><i class="fa fa-wallet"></i> SewaAstra Wallet & Rewards</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Coupons')">
+            <div><i class="fa fa-tags"></i> Active Discount Coupons</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Addresses')">
+            <div><i class="fa fa-address-book"></i> Saved Delivery Addresses</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Notifications')">
+            <div><i class="fa fa-bell"></i> Push Notification Settings</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Favorites')">
+            <div><i class="fa fa-heart"></i> Favorite Services List</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Referral')">
+            <div><i class="fa fa-users"></i> Refer & Earn ₹100</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Safety')">
+            <div><i class="fa fa-shield-alt"></i> Safety & Hygiene Guidelines</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Partner')">
+            <div><i class="fa fa-user-tie"></i> Join as Service Partner</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('Feedback')">
+            <div><i class="fa fa-star-half-alt"></i> Rate App on Play Store</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+        <div class="setting-item-row" onclick="custReqAction('TandC')">
+            <div><i class="fa fa-file-contract"></i> Terms & Conditions</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+
+        <div class="settings-section-title">Account & Security</div>
+        <div class="setting-item-row" onclick="openSupportView(); toggleProfile();">
+            <div><i class="fa fa-headset"></i> Help & Customer Support</div> <i class="fa fa-chevron-right" style="font-size: 12px; color:#aaa;"></i>
+        </div>
+
+        <button onclick="logout()" style="width:100%; padding:14px; background: #333; color:white; border:none; border-radius:14px; font-weight:bold; font-size:15px; cursor:pointer; margin-top:20px; margin-bottom: 20px;">
+            लॉगआउट करें (Logout)
+        </button>
+    </div>
+</div>
+
+<!-- MAIN HOME CONTAINER -->
+<div id="homePage">
+    <header class="app-header">
+        <div class="header-top">
+            <div class="brand-text">SEWAASTRA</div>
+            <div class="header-actions">
+                <div class="loc-badge" onclick="getLiveLocation()"><i class="fa fa-map-marker-alt"></i> <span id="locTxt">GPS लोकेट करें</span></div>
+                <div id="headerProfile" onclick="toggleProfile()">
+                    <img id="headerPic" class="user-pic-circle" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" />
+                </div>
+            </div>
+        </div>
+        <div class="search-container">
+            <i class="fa fa-search"></i>
+            <input type="text" id="srch" class="search-bar" placeholder="मोबाइल, AC, फ्रिज या कोई भी नई सर्विस खोजें..." onkeyup="filterServices()" />
+        </div>
+    </header>
+
+    <div class="banner-carousel" id="bannerCarouselArea"></div>
+    <div class="cat-grid" id="catGridArea"></div>
+
+    <div id="subTabsArea" class="sub-tabs"></div>
+    <div class="section-header" style="padding:15px; font-weight:800; font-size:18px;"><span id="catTitle">Top Recommended Services</span></div>
+    
+    <div class="service-container" id="display"></div>
+</div>
+
+<!-- SUPPORT VIEW CONTAINER -->
+<div id="supportPage" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; overflow-y: auto;">
+    <div class="support-header">
+        <div style="display: flex; align-items: center; max-width: 600px; margin: 0 auto;">
+            <button onclick="closeSupportView()" style="border:none; background:none; font-size:22px; color:#15a04a; cursor: pointer;"><i class="fa fa-arrow-left"></i></button>
+            <h3 style="flex-grow:1; margin:0; font-size:18px;">Customer Support</h3>
+        </div>
+    </div>
+
+    <div style="max-width: 600px; margin: 0 auto; padding-bottom: 40px;">
+        <div style="text-align: center; padding: 40px 20px;">
+            <div style="background: #e8f5e9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="fa fa-headset" style="font-size: 35px; color: #15a04a;"></i>
+            </div>
+            <h2 style="margin: 0;">नमस्ते! हम आपकी सहायता के लिए यहाँ हैं।</h2>
+            <p style="color: #666; margin-top: 8px;">अपनी समस्या चुनें ताकि हम तुरंत समाधान दे सकें।</p>
+        </div>
+
+        <div id="step1">
+            <div class="support-tile" onclick="selectSuppIssue('Payment Problem')">
+                <span>💰 पेमेंट की समस्या (Payment Issue)</span> <i class="fa fa-chevron-right"></i>
+            </div>
+            <div class="support-tile" onclick="selectSuppIssue('Order Tracking')">
+                <span>📦 ऑर्डर कहाँ पहुँचा? (Order Status)</span> <i class="fa fa-chevron-right"></i>
+            </div>
+            <div class="support-tile" onclick="selectSuppIssue('Cancellation')">
+                <span>❌ बुकिंग रद्द करना (Cancellation)</span> <i class="fa fa-chevron-right"></i>
+            </div>
+            <div class="support-tile" onclick="selectSuppIssue('Technical Issue')">
+                <span>🛠️ ऐप में तकनीकी समस्या (App Issue)</span> <i class="fa fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <div id="step2" style="display:none;">
+            <div class="contact-container" style="text-align: center;">
+                <p id="issueLabel" style="font-size: 14px; color: #15a04a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;"></p>
+                <h3 style="margin-bottom: 25px;">विशेषज्ञ से सीधे बात करें</h3>
+                <button class="btn-wa" onclick="talkToExpert('wa')">
+                    <i class="fab fa-whatsapp" style="font-size: 20px;"></i> WhatsApp Chat करें
+                </button>
+                <button class="btn-call" onclick="talkToExpert('call')">
+                    <i class="fa fa-phone-alt"></i> अभी कॉल करें
+                </button>
+                <span class="back-link" onclick="resetSupportFlow()">← दूसरी समस्या चुनें</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bottom-nav">
+    <div class="nav-item active" onclick="if(window.__exitGuard)window.__exitGuard.silent();location.reload()" id="navHome"><i class="fa fa-home"></i>Home</div>
+    <div class="nav-item" onclick="openSupportView()" id="navSupp"><i class="fa fa-headset"></i><span>Support</span></div>
+    <div class="nav-item" onclick="checkout()"><i class="fa fa-shopping-cart"></i>Cart <span class="badge" id="bCount">0</span></div>
+    <div class="nav-item" onclick="showHistory()" id="navHis"><i class="fa fa-history"></i>History</div>
+</footer>
+
+<!-- BLINKIT STYLE CART OVERLAY -->
+<div id="fullCartPanel" class="cart-overlay" onclick="closeCart(event)">
+    <div class="cart-panel" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0;">चेकआउट करें (Checkout)</h2>
+            <i class="fa fa-times-circle" onclick="closeCart()" style="font-size:24px; color:#ccc; cursor:pointer;"></i>
+        </div>
+
+        <div class="cart-card" id="cartItemsList"></div>
+
+        <div class="cart-card" style="background:#fff9f5; border:1px dashed var(--primary);">
+            <label style="font-size:12px; font-weight:bold; color:var(--primary)"><i class="fa fa-tag"></i> उपलब्ध कूपन चुनें या कोड दर्ज करें</label>
+            <div id="availableCouponsContainer" style="display: flex; gap: 6px; overflow-x: auto; margin-top: 8px; padding-bottom: 5px;"></div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <input type="text" id="couponInput" class="input-field" placeholder="उदा. SEWA50" style="margin:0; text-transform:uppercase;">
+                <button onclick="applyCoupon()" style="padding:10px 15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">लागू करें</button>
+            </div>
+            <span id="couponMsg" style="font-size:11px; color:green; display:block; margin-top:5px;"></span>
+        </div>
+
+        <div class="cart-card">
+            <div class="bill-row"><span>Item Total</span> <span id="sTotal">₹0</span></div>
+            <div class="bill-row" style="color:green;"><span>Discount Applied</span> <span id="discountRowVal">-₹0</span></div>
+            <div class="bill-row"><span>Handling Fee</span> <span>₹10</span></div>
+            <div class="bill-row total-amt"><span>Total to Pay</span> <span id="fTotal">₹0</span></div>
+        </div>
+        
+        <div class="cart-card">
+            <label style="font-size:12px; font-weight:bold; color:var(--primary)">डिलिवरी पता (Delivery Address)</label>
+            <div class="address-card" style="margin-top: 10px;">
+                <button class="loc-btn" onclick="getLiveLocation()">
+                    <i class="fa fa-crosshairs"></i> GPS ऑटो-डिटेक्ट लोकेशन
+                </button>
+                <button class="map-btn" onclick="openMapModal()">
+                    <i class="fa fa-map"></i> मैप पर लोकेशन चुनें
+                </button>
+                <input type="text" id="manualAddr" class="addr-input" placeholder="📍 एरिया / जगह का नाम + PIN (GPS से auto भरेगा)">
+                <input type="text" id="proAddrExtra" class="addr-input" placeholder="🏠 मकान नं / फ्लैट / गली / लैंडमार्क (Additional Address)">
+                <input type="tel" id="altMobile" class="addr-input" placeholder="वैकल्पिक मोबाइल नंबर">
+                <input type="hidden" id="googleMapsLink" value="Not Provided">
+            </div>
+        </div>
+
+        <div class="cart-card">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1">
+                    <label style="font-size:11px; font-weight:bold; color:var(--primary)">तारीख (Date)</label>
+                    <input type="date" id="cartDate" class="input-field">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:11px; font-weight:bold; color:var(--primary)">समय (Time)</label>
+                    <input type="time" id="cartTime" class="input-field">
+                </div>
+            </div>
+            <textarea id="cartRemark" class="input-field" placeholder="विशेष निर्देश (उदा. सीढ़ी लेकर आएं)"></textarea>
+        </div>
+
+        <div class="cart-card">
+            <label style="font-size:12px; font-weight:bold; color:var(--primary); display:block; margin-bottom: 8px;">भुगतान का तरीका (Payment Mode)</label>
+            <div style="display:flex; gap:10px;">
+                <button id="payCash" onclick="setPayMode('Cash')" style="flex:1; padding:12px; border:2px solid #ddd; background:var(--card-bg); border-radius:12px; font-weight:bold; cursor:pointer;">Cash</button>
+                <button id="payOnline" onclick="setPayMode('Online')" style="flex:1; padding:12px; border:2px solid #ddd; background:var(--card-bg); border-radius:12px; font-weight:bold; cursor:pointer;">Online</button>
+            </div>
+        </div>
+
+        <button onclick="handleFinalOrder()" style="width:100%; padding:18px; background:#15a04a; color:white; border:none; border-radius:15px; font-weight:bold; font-size:18px; box-shadow: 0 5px 15px rgba(21,160,74,0.3); cursor:pointer;">
+             (Order Place )
+        </button>
+    </div>
+</div>
+
+<!-- ADVANCED ADMIN PANEL MODAL -->
+<div id="adminModal" class="full-overlay" style="display:none;">
+    <div class="box" style="max-width: 460px; text-align: left; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0; color:var(--primary);">🛠️ Admin Panel</h3>
+            <i class="fa fa-times" onclick="closeAdminPanel()" style="cursor:pointer; font-size:20px;"></i>
+        </div>
+        
+        <div style="display:flex; gap:5px; margin-bottom:15px; background:#f0f0f0; padding:4px; border-radius:10px;">
+            <button id="admTabServBtn" onclick="switchAdminTab('services')" style="flex:1; padding:8px; border:none; border-radius:8px; font-weight:bold; background:var(--primary); color:white; font-size:11px; cursor:pointer;">Services</button>
+            <button id="admTabCatBtn" onclick="switchAdminTab('categories')" style="flex:1; padding:8px; border:none; border-radius:8px; font-weight:bold; background:transparent; color:#555; font-size:11px; cursor:pointer;">Categories</button>
+            <button id="admTabBannerBtn" onclick="switchAdminTab('banners')" style="flex:1; padding:8px; border:none; border-radius:8px; font-weight:bold; background:transparent; color:#555; font-size:11px; cursor:pointer;">Banners</button>
+            <button id="admTabCouponBtn" onclick="switchAdminTab('coupons')" style="flex:1; padding:8px; border:none; border-radius:8px; font-weight:bold; background:transparent; color:#555; font-size:11px; cursor:pointer;">Coupons</button>
+        </div>
+
+        <div id="adminSecServices">
+            <label style="font-size:11px; font-weight:bold;">1. कैटेगरी चुनें</label>
+            <select id="adminCatSelect" class="input-field" onchange="populateAdminServiceDropdown()"></select>
+
+            <label style="font-size:11px; font-weight:bold;">2. सर्विस चुनें (या नई जोड़ें)</label>
+            <select id="adminServiceSelect" class="input-field" onchange="loadServiceDataIntoForm()">
+                <option value="NEW">-- नई सर्विस जोड़ें (New Service) --</option>
+            </select>
+
+            <label style="font-size:11px; font-weight:bold;">सर्विस का नाम (Service Name)</label>
+            <input type="text" id="adminServiceName" class="input-field" placeholder="उदा. Screen Repair">
+
+            <label style="font-size:11px; font-weight:bold;">कीमत (Price in ₹)</label>
+            <input type="number" id="adminServicePrice" class="input-field" placeholder="999">
+
+            <label style="font-size:11px; font-weight:bold;">इमेज URL या गैलरी से चुनें (Image Link)</label>
+            <input type="text" id="adminServiceImage" class="input-field" placeholder="https://images.unsplash.com/...">
+            <input type="file" id="adminGalleryInput" accept="image/*" style="font-size:11px; margin-top:2px;" onchange="convertAdminImageToUrl(this, 'adminServiceImage')">
+
+            <label style="font-size:11px; font-weight:bold;">मल्टी-ऑप्शंस (कॉमा लगाकर लिखें)</label>
+            <textarea id="adminSubOptions" class="input-field" rows="2" placeholder="Original Glass (+₹500), Tempered Glass (+₹150)"></textarea>
+
+            <button onclick="saveAdminServiceChanges()" style="width:100%; background:var(--success); margin-top:10px;">सर्विस सेव करें (Save Service)</button>
+        </div>
+
+        <div id="adminSecCategories" style="display:none;">
+            <label style="font-size:11px; font-weight:bold;">नई कैटेगरी की कुंजी (Key / ID, उदा. 'salon')</label>
+            <input type="text" id="adminNewCatKey" class="input-field" placeholder="salon">
+
+            <label style="font-size:11px; font-weight:bold;">कैटेगरी का नाम (Display Name, उदा. 'Salon & Spa')</label>
+            <input type="text" id="adminNewCatName" class="input-field" placeholder="Salon & Spa">
+
+            <label style="font-size:11px; font-weight:bold;">फ़ॉन्ट-असम आइकॉन (FontAwesome Icon Class, उदा. 'fa-cut')</label>
+            <input type="text" id="adminNewCatIcon" class="input-field" placeholder="fa-cut">
+
+            <button onclick="saveAdminCategory()" style="width:100%; background:var(--success); margin-top:10px;">नई कैटेगरी जोड़ें (Add Category)</button>
+            <div id="adminCategoriesList" style="margin-top:15px; font-size:12px; color:#555;"></div>
+        </div>
+
+        <div id="adminSecBanners" style="display:none;">
+            <label style="font-size:11px; font-weight:bold;">बैनर चुनें (या नया जोड़ें)</label>
+            <select id="adminBannerSelect" class="input-field" onchange="loadBannerDataIntoForm()">
+                <option value="NEW">-- नया बैनर जोड़ें (New Banner) --</option>
+            </select>
+
+            <label style="font-size:11px; font-weight:bold;">बैनर शीर्षक (Banner Title)</label>
+            <input type="text" id="adminBannerTitle" class="input-field" placeholder="🎉 पहली बुकिंग पर 50% छूट">
+
+            <label style="font-size:11px; font-weight:bold;">बैनर उप-शीर्षक / विवरण (Description)</label>
+            <input type="text" id="adminBannerDesc" class="input-field" placeholder="कूपन कोड: SEWA50 का उपयोग करें">
+
+            <label style="font-size:11px; font-weight:bold;">बैनर बैकग्राउंड इमेज (URL या गैलरी)</label>
+            <input type="text" id="adminBannerBg" class="input-field" placeholder="https://images.unsplash.com/...">
+            <input type="file" accept="image/*" style="font-size:11px; margin-top:2px;" onchange="convertAdminImageToUrl(this, 'adminBannerBg')">
+
+            <button onclick="saveAdminBannerChanges()" style="width:100%; background:var(--success); margin-top:10px;">बैनर सेव करें (Save Banner)</button>
+        </div>
+
+        <div id="adminSecCoupons" style="display:none;">
+            <label style="font-size:11px; font-weight:bold;">कूपन कोड (Coupon Code)</label>
+            <input type="text" id="adminCouponCode" class="input-field" placeholder="उदा. SEWA50" style="text-transform:uppercase;">
+
+            <label style="font-size:11px; font-weight:bold;">छूट राशि (Discount Amount in ₹)</label>
+            <input type="number" id="adminCouponDiscount" class="input-field" placeholder="50">
+
+            <button onclick="saveAdminCouponChanges()" style="width:100%; background:var(--success); margin-top:10px;">कूपन सेव करें (Save Coupon)</button>
+            <div id="adminCouponsList" style="margin-top:15px; font-size:12px; color:#555;"></div>
+        </div>
+    </div>
+</div>
+
+<footer style="text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--border-color); font-size: 13px;">
+    <p>&copy; 2026 SewaAstra. All rights reserved.</p>
+    <div style="margin-top: 8px; display: flex; justify-content: center; gap: 15px;">
+        <a onclick="event.preventDefault();swLegal('privacy')" style="color: var(--primary); text-decoration: underline; font-weight: 600; cursor:pointer;">Privacy Policy</a>
+        <span style="color: #ccc;">|</span>
+        <a onclick="event.preventDefault();swLegal('terms')" style="color: var(--primary); text-decoration: underline; font-weight: 600; cursor:pointer;">Terms</a>
+        <span style="color: #ccc;">|</span>
+        <a onclick="event.preventDefault();swLegal('about')" style="color: var(--primary); text-decoration: underline; font-weight: 600; cursor:pointer;">About Us</a>
+    </div>
+</footer>
+
+
+
+<!-- ═══════ SEWAASTRA PRO CLOUD UPGRADE LAYER v2.0 ═══════ -->
+
+
+
+
+<!-- ═══════ SEWAASTRA PRO-MAX LAYER v2.2 ═══════ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ✉️ EMAIL + PASSWORD LOGIN (mobile OTP login हटा दिया गया — v7.0) -->
+
+
+
+<!-- 🔒 SEWAASTRA OWN MASKED CALLING v9 — WebRTC + Firestore (Agora हटा दिया, कोई App-ID/SDK नहीं) -->
+
+
+
+
+
+
+
+
+<!-- 💎 SUNDER POPUP SYSTEM v8.3 -->
+
+
+<!-- 🚪 EXIT CONFIRMATION GUARD v8.2 -->
+
+
+
+
+
+
+
+
+
+
+
+<script src="js/04-app.js"></script>
+</body>
+</html>
